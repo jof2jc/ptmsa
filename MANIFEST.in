@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include ptmsa *.css
+recursive-include ptmsa *.csv
+recursive-include ptmsa *.html
+recursive-include ptmsa *.ico
+recursive-include ptmsa *.js
+recursive-include ptmsa *.json
+recursive-include ptmsa *.md
+recursive-include ptmsa *.png
+recursive-include ptmsa *.py
+recursive-include ptmsa *.svg
+recursive-include ptmsa *.txt
+recursive-exclude ptmsa *.pyc
