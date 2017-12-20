@@ -90,6 +90,10 @@ doc_events = {
     "Sales Invoice": {
 	"on_submit": "ptmsa.ptmsa.custom_ptmsa.set_delivery_status_per_billed",
 	"on_cancel": "ptmsa.ptmsa.custom_ptmsa.set_delivery_status_per_billed"
+    },
+    "Purchase Invoice": {
+	"on_submit": "ptmsa.ptmsa.custom_ptmsa.set_purchase_receipt_per_billed",
+	"on_cancel": "ptmsa.ptmsa.custom_ptmsa.set_purchase_receipt_per_billed"
     }
 }
 

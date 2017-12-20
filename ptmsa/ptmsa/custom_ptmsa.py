@@ -11,7 +11,39 @@ from collections import defaultdict
 
 # test_records = frappe.get_test_records('testdoctype')
 
+def set_purchase_receipt_per_billed(self, method):
+	if self.docstatus == 1 or self.docstatus == 2:
+		for d in self.items:
+			if d.purchase_receipt:
+				ref_doc_qty = flt(frappe.db.sql("""select ifnull(sum(qty), 0) from `tabPurchase Receipt Item`
+				where parent=%s""", (d.purchase_receipt))[0][0])
+				print 'ref_doc_qty=' + cstr(ref_doc_qty)
+	
+				billed_qty = flt(frappe.db.sql("""SELECT ifnull(sum(qty), 0) as billed_qty FROM `tabPurchase Invoice` si INNER JOIN `tabPurchase Invoice Item` it 
+						ON si.name=it.parent where si.docstatus=1 and it.purchase_receipt=%s and si.name=%s""", (d.purchase_receipt, self.name))[0][0])
+				#billed_qty = 100
+				print 'billed_qty=' + cstr(billed_qty)
+
+				per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
+					/ ref_doc_qty)*100
+				print 'per_billed=' + cstr(per_billed)
+
+				doc = frappe.get_doc("Purchase Receipt", d.purchase_receipt)
+
+				#frappe.throw(_("doc.per_billed = {0} per_billed = {1}").format(doc.per_billed, per_billed))
+
+				if doc.per_billed < 100:
+					doc.db_set("per_billed", per_billed)
+					doc.set_status(update=True)
+
+				if self.docstatus == 2:
+					doc.db_set("per_billed", "0")
+					doc.set_status(update=True)
+
 def set_delivery_status_per_billed(self, method):
+	if self.company not in ["PT SINAR MAS SEMESTA", "PT MSA"]:
+		return
+
 	if self.docstatus == 1 or self.docstatus == 2:
 		for d in self.items:
 			if d.delivery_note:
@@ -19,8 +51,9 @@ def set_delivery_status_per_billed(self, method):
 				where parent=%s""", (d.delivery_note))[0][0])
 				print 'ref_doc_qty=' + cstr(ref_doc_qty)
 	
-				billed_qty = flt(frappe.db.sql("""select ifnull(sum(qty), 0) from `tabSales Invoice Item` 
-					where delivery_note=%s and docstatus=1""", (d.delivery_note))[0][0])
+				billed_qty = flt(frappe.db.sql("""SELECT ifnull(sum(qty), 0) as billed_qty FROM `tabSales Invoice` si INNER JOIN `tabSales Invoice Item` it 
+						ON si.name=it.parent where si.docstatus=1 and it.delivery_note=%s and si.name=%s""", (d.delivery_note, self.name))[0][0])
+				#billed_qty = 100
 				print 'billed_qty=' + cstr(billed_qty)
 
 				per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
@@ -29,12 +62,16 @@ def set_delivery_status_per_billed(self, method):
 
 				doc = frappe.get_doc("Delivery Note", d.delivery_note)
 
-				if self.docstatus == 1 and doc.per_billed < 100:
-					doc.db_set("per_billed", per_billed)
-				else:
-					doc.db_set("per_billed", "0")
+				#frappe.throw(_("doc.per_billed = {0} per_billed = {1}").format(doc.per_billed, per_billed))
 
-				doc.set_status(update=True)
+				if doc.per_billed < 100:
+					doc.db_set("per_billed", per_billed)
+					doc.set_status(update=True)
+
+				if self.docstatus == 2:
+					doc.db_set("per_billed", "0")
+					doc.set_status(update=True)
+				
 
 def patch_delivery_status_per_billed():
 	_list = frappe.db.sql ("""SELECT it.delivery_note, ifnull(sum(qty), 0) as billed_qty FROM `tabSales Invoice` si INNER JOIN `tabSales Invoice Item` it 
