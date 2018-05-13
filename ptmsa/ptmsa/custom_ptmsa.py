@@ -33,7 +33,7 @@ def set_purchase_receipt_per_billed(self, method):
 				#frappe.throw(_("doc.per_billed = {0} per_billed = {1}").format(doc.per_billed, per_billed))
 
 				if doc.per_billed < 100:
-					doc.db_set("per_billed", per_billed)
+					doc.db_set("per_billed", "100")
 					doc.set_status(update=True)
 
 				if self.docstatus == 2:
@@ -41,9 +41,7 @@ def set_purchase_receipt_per_billed(self, method):
 					doc.set_status(update=True)
 
 def set_delivery_status_per_billed(self, method):
-	if self.company not in ["PT SINAR MAS SEMESTA", "PT MSA"]:
-		return
-
+	#frappe.msgprint("hi..")
 	if self.docstatus == 1 or self.docstatus == 2:
 		for d in self.items:
 			if d.delivery_note:
@@ -62,10 +60,10 @@ def set_delivery_status_per_billed(self, method):
 
 				doc = frappe.get_doc("Delivery Note", d.delivery_note)
 
-				#frappe.throw(_("doc.per_billed = {0} per_billed = {1}").format(doc.per_billed, per_billed))
+				#frappe.msgprint(_("doc.per_billed = {0} per_billed = {1}").format(doc.per_billed, per_billed))
 
 				if doc.per_billed < 100:
-					doc.db_set("per_billed", per_billed)
+					doc.db_set("per_billed", "100")
 					doc.set_status(update=True)
 
 				if self.docstatus == 2:
